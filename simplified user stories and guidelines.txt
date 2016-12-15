@@ -1,0 +1,14 @@
+presented with a random series of presses starting with one
+each time input series correctly, see same series but with add'l step
+here sound with each press by player or comp
+press wrong, notified, and pattern plays again from that point
+display for how many steps are in current series
+button for restart
+button for strict mode
+20 correct steps = win
+
+Start button
+Restart button
+Strict mode button
+Four color buttons
+Display for count of turns
