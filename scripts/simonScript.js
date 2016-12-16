@@ -200,4 +200,26 @@ var playbackLoopIterator=0;
 	$("#strictButton").on("click", function(){
 		strictModeOn();
 	});
+
+	$("#0").on("tap",function(){
+		playerTurn(0);
+	});
+	$("#1").on("tap",function(){
+		playerTurn(1);
+	});
+	$("#2").on("tap",function(){
+		playerTurn(2);
+	});
+	$("#3").on("tap",function(){
+		playerTurn(3);
+	});
+	$("#startButton").on("tap", function(){
+		start();
+	});
+	$("#restartButton").on("tap", function(){
+		restart();
+	});
+	$("#strictButton").on("tap", function(){
+		strictModeOn();
+	});
 });
