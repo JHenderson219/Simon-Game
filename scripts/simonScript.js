@@ -5,30 +5,34 @@ var sequenceArray=[];
 var playerArray=[];
 var gameIsRestarted=true;
 var strictMode=false;
-var accumulator = 0
+var accumulator = 0;
+var playbackLoopIterator=0;
 //Thanks to MDN for this function! Generates an integer between min and max, inclusive.
 	function getRandomIntInclusive(min, max) {
   		min = Math.ceil(min);
   		max = Math.floor(max);
   	return Math.floor(Math.random() * (max - min + 1)) + min;
 	}
-	function restart(){
+	function globalVarsToDefaults(){
 		isPlayerTurn=undefined;
-		turnCount=0;
-		sequenceArray=[];
 		currentSound=undefined;
+		playbackLoopIterator=0;
+		turnCount=0;
+		accumulator = 0;
+		sequenceArray=[];
+		playerArray=[];
 		gameIsRestarted=true;
 		strictMode=false;
+	}
+	function restart(){
+		globalVarsToDefaults();
 		$("#alertArea").empty();
 		updateTurnCounter();
 	}
 	function playSound (quadrant){
-		console.log("playSound's current quadrant is "+quadrant);
-		console.log(quadrant+"Sound")
-	currentSound = document.getElementById(quadrant+"Sound");
+		currentSound = document.getElementById(quadrant+"Sound");
 		currentSound.play();
 	}
-
 	function start(){
 		if(gameIsRestarted){
 		computerTurn();
@@ -40,57 +44,139 @@ var accumulator = 0
 	//Thanks to Daniel Vassallo on Stack Exchange for the idea for this function.
 	// Plays back and animates the current array of quadrants.
 	function playbackAndAnimateLoop(seqArr){
-		var i=0;
-		var playbackQuadrant=seqArr[i];
-		$("#"+playbackQuadrant).removeClass("animated pulse");
-		console.log("sequence array passed to playback function is "+seqArr);
-		console.log("index "+i+" of seqArr is "+seqArr[i]);
+		var playbackQuadrant=seqArr[playbackLoopIterator];
 		setTimeout(function(){
-			playSound(playbackQuadrant);
-			$("#"+playbackQuadrant).addClass("animated pulse");
+			setTimeout(function(){
+				$("#"+playbackQuadrant).removeClass("animated pulse");
+				}, 5);
+			setTimeout(function(){
+				playSound(playbackQuadrant);
+				$("#"+playbackQuadrant).addClass("animated pulse");
+				playbackLoopIterator++;
+				if (playbackLoopIterator<sequenceArray.length){
+					playbackAndAnimateLoop(sequenceArray);
+				} else{
+					playbackLoopIterator=0;
+					}
+				},505);
 		},500);
-		i++;
-		if (i<sequenceArray.length){
-			playbackAndAnimateLoop();
-		}
 	}
+
 	function computerTurn(){
-		var currentQuadrant = getRandomIntInclusive(0,3);
-		sequenceArray.push(currentQuadrant);
-		console.log("sequence array is "+sequenceArray);
-		turnCount++;
-		updateTurnCounter();
-		playbackAndAnimateLoop(sequenceArray);
+		setTimeout(function(){
+			var currentQuadrant = getRandomIntInclusive(0,3);
+			sequenceArray.push(currentQuadrant);
+			turnCount++;
+			updateTurnCounter();
+			playbackAndAnimateLoop(sequenceArray);
+			isPlayerTurn=true;
+		},500);
 	}
+
 	function failureAlert(){
 		if(!strictMode){
-			$("#alertArea").append('<h1 class="text-center animated zoomIn"> Incorrect sequence. Please try again.</h3>')
-			playbackAndAnimateLoop();
-			playerTurn=true;
+			$("#alertArea").empty().append('<h1 class="text-center animated zoomIn" id="alertText"> Incorrect sequence. Please try again.</h3>');
+			setTimeout(function(){
+				$("#alertText").removeClass("animated zoomIn");
+			},1000);
+			setTimeout(function(){
+				$("#alertText").addClass("animated zoomOut");
+			},2000);
+			playbackAndAnimateLoop(sequenceArray);
+			isPlayerTurn=true;
 		}else{
-			$("#alertArea").empty().append('<h1 class="text-center animated zoomIn"> You wanted strict. You got it. Incorrect sequence. Please restart and try again.</h3>')
+			$("#alertText").empty().append('<h1 class="text-center animated zoomIn" id="alertText"> You wanted strict. You got it. Incorrect sequence. Please restart and try again.</h3>');
 		}
 	}
-	function playerTurn(quadrant){
-		if(isPlayerTurn){
+	/*function playerTurn(quadrant){
+		debugger;
+		playerArray=[];
+		if(isPlayerTurn && accumulator<sequenceArray.length){
+			playerClicksQuadrant(quadrant);
 			playerArray.push(quadrant);
-			console.log(playerArray.join(" "))
-			if(playerArray[accumulator]!==sequenceArray[accumulator]){
+			accumulator++;
+		} else if (isPlayerTurn&&accumulator==playerArray.length){
+			playerArray.push(quadrant);
+			accumulator=0;
+			if(playerArray.join("")!=sequenceArray.join("")){
 				failureAlert();
 			} else{
-				playSound(quadrant);
-				$("#"+quadrant).removeClass("animated pulse");
-				accumulator++;
-				setTimeout(function(){
-					$("#"+quadrant).addClass("animated pulse");
-				},10);
+				playerClicksQuadrant(quadrant);
 				isPlayerTurn=false;
-				computerTurn();
+				setTimeout(function(){
+					computerTurn();
+				},500);
+			}
+		}
+	}*/
+
+	function playerTurn(quadrant){
+		if(isPlayerTurn){
+			if(checkForFailure(quadrant,accumulator)){
+				isPlayerTurn=false;
+				playerArray=[];
+				accumulator=0;
+				failureAlert();
+			}else {
+				playerArray.push(quadrant);
+				accumulator++;
+				playerClicksQuadrant(quadrant);
+				if(accumulator===20){
+					playerVictory();
+				} else if (playerArray.length==sequenceArray.length){
+					endPlayerTurn();
+				}
 			}
 		}
 	}
+	function victoryFanfare(){
+		playSound(2);
+		setTimeout(function(){
+			playSound(0);
+		},400);
+		setTimeout(function(){
+			playSound(1);
+		},800);
+		setTimeout(function(){
+			playSound(3);
+		},1200);
+	}
+	function checkForFailure(quad,index){
+		if(quad!==sequenceArray[index]){
+			return true;
+		}
+		return false;
+	}
+	function playerVictory(){
+		console.log("Player wins!")
+		isPlayerTurn=false;
+		$("#alertArea").empty().append('<h1 class="text-center animated zoomIn" id="alertText"> You win!</h1>');
+		victoryFanfare();
+	}
+	function endPlayerTurn(){
+		isPlayerTurn=false;
+		accumulator=0;
+		playerArray=[];
+		setTimeout(function(){
+			computerTurn();
+		},500);
+	}
+	function playerClicksQuadrant(quad){
+		playSound(quad);
+		$("#"+quad).removeClass("animated pulse");
+		setTimeout(function(){
+			$("#"+quad).addClass("animated pulse");
+			},10);
+	}
+
 	function updateTurnCounter(){
 		$("#turnCounter").empty().append("<h1 class='text-center animated fadeIn' id='turnCounter'> "+turnCount+"</h1>")
+	}
+	function strictModeOn(){
+		if (gameIsRestarted){
+			strictMode=true;
+			$("#alertArea").empty().append('<h1 class="text-center animated zoomIn" id="alertText"> Strict Mode Activated!</h1>');
+		}
 	}
 
 	$("#0").on("click",function(){
@@ -112,6 +198,6 @@ var accumulator = 0
 		restart();
 	});
 	$("#strictButton").on("click", function(){
-
+		strictModeOn();
 	});
 });
