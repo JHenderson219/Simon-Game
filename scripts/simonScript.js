@@ -162,7 +162,7 @@ var playbackQuadrant;
 		},1200);
 	}
 
-	//Checks a given quadrant against an index of the current sequence, returning true for failure, false for success.
+	//Checks a given quadrant against an index of the current sequence, returning true for failure, false for success
 	function checkForFailure(quad,index){
 		if(quad!==sequenceArray[index]){
 			return true;
@@ -170,7 +170,7 @@ var playbackQuadrant;
 		return false;
 	}
 
-	//Prevents player from interacting with quadrants after a victory, displays a victory message, plays a fanfare.
+	//Prevents player from interacting with quadrants after a victory, displays a victory message, plays a fanfare
 	function playerVictory(){
 		console.log("Player wins!")
 		isPlayerTurn=false;
@@ -178,7 +178,7 @@ var playbackQuadrant;
 		victoryFanfare();
 	}
 
-	//Ends the player's turn, resets variables in preparation for next turn, and starts computer's turn after 500 ms.
+	//Ends the player's turn, resets variables in preparation for next turn, and starts computer's turn after 500 ms
 	function endPlayerTurn(){
 		isPlayerTurn=false;
 		accumulator=0;
@@ -188,6 +188,7 @@ var playbackQuadrant;
 		},500);
 	}
 	
+	//Plays sound, clears animation, and sets new animation for a given quadrant
 	function playerClicksQuadrant(quad){
 		playSound(quad);
 		$("#"+quad).removeClass("animated pulse");
@@ -195,10 +196,11 @@ var playbackQuadrant;
 			$("#"+quad).addClass("animated pulse");
 			},10);
 	}
-
+	//Updates the turn counter to reflect current number of turns.
 	function updateTurnCounter(){
 		$("#turnCounter").empty().append("<h1 class='text-center animated fadeIn' id='turnCounter'> "+turnCount+"</h1>")
 	}
+	//If game is restarted, enables strict mode and displays text to notify the player.
 	function strictModeOn(){
 		if (gameIsRestarted){
 			strictMode=true;
@@ -206,6 +208,7 @@ var playbackQuadrant;
 		}
 	}
 
+	//Click events for each quadrant and button
 	$("#0").on("click",function(){
 		playerTurn(0);
 	});
@@ -228,6 +231,7 @@ var playbackQuadrant;
 		strictModeOn();
 	});
 
+	//Tap events for each quadrant and button
 	$("#0").on("tap",function(){
 		playerTurn(0);
 	});
